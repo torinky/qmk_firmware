@@ -7,11 +7,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -22,6 +22,9 @@
   例: Shift + 2 で @ を入力する
 
   変換された文字はキーリピートが無効です。
+
+  QMKのKey Overrides機能だとリピートが効く一方、キーマップで定義したJP_ATなどは機能しなかった。
+  実際にシフト+KC_2を押した場合しか機能しない。
 
 */
 
@@ -54,11 +57,13 @@ const uint16_t us2jis[][2] = {
 };
 
 bool twpair_on_jis(uint16_t keycode, keyrecord_t *record) {
+  // if (!layer_state_is(WIN_BASE)) return true; // レイヤー判定は process_record_user で行う
+
   if (!record->event.pressed) return true;
 
   uint16_t skeycode; // シフトビットを反映したキーコード
-  bool lshifted = keyboard_report->mods & MOD_BIT(KC_LSFT); // シフトキーの状態
-  bool rshifted = keyboard_report->mods & MOD_BIT(KC_RSFT);
+  bool lshifted = get_mods() & MOD_BIT(KC_LSFT); // シフトキーの状態
+  bool rshifted = get_mods() & MOD_BIT(KC_RSFT);
   bool shifted = lshifted | rshifted;
 
   if (shifted) {
@@ -86,3 +91,4 @@ bool twpair_on_jis(uint16_t keycode, keyrecord_t *record) {
 
   return true;
 }
+

@@ -16,6 +16,7 @@
 
 #include QMK_KEYBOARD_H
 #include "keychron_common.h"
+#include "twpair_on_jis.h"
 
 enum layers{
 	MAC_BASE,
@@ -74,18 +75,28 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 #endif // ENCODER_MAP_ENABLE
 
 // clang-format on
-
 // bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 //     if (!process_record_keychron_common(keycode, record)) {
 //         return false;
 //     }
 //     return true;
 // }
+
+
+// Keychron共通処理とtwpair_on_jisを実行するprocess_record_user
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (!process_record_keychron_common(keycode, record)) {
-        if (!twpair_on_jis(keycode, record))
-            return false;
+  // レイヤーが WIN_BASE の場合のみ twpair_on_jis を実行し、先に処理する
+    if(layer_state_cmp(default_layer_state, WIN_BASE)){
+        if (!twpair_on_jis(keycode, record)) {
+              return false; // twpair_on_jis で処理された場合は、以降の処理を行わない
         }
     }
-    return true;
+
+  // twpair_on_jis で処理されなかった場合のみ、Keychron共通処理を行う
+  if (!process_record_keychron_common(keycode, record)) {
+    return false;
+  }
+
+  return true;
 }
+
